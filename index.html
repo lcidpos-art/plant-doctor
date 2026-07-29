@@ -5,108 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 식물 진단 주치의</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Helvetica Neue", sans-serif; }
+    /* 기존 스타일 그대로 유지 */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
     body { background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
-    
-    /* 스마트폰 프레임 */
-    .phone-frame {
-      width: 100%; max-width: 400px; height: 750px; background: #fff;
-      border-radius: 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      overflow: hidden; display: flex; flex-direction: column; position: relative;
-      border: 6px solid #111;
-    }
-    
-    /* 상단 요약 바 */
+    .phone-frame { width: 100%; max-width: 400px; height: 750px; background: #fff; border-radius: 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; position: relative; border: 6px solid #111; }
     .header { background: #fff; padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
-    .card-toggle-btn {
-      background: #f1f3f5; color: #212529; border: none; padding: 8px 16px;
-      border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px;
-    }
-    
-    /* 카메라 테스트 스캔 바 */
-    .scan-bar { background: #fff; padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
-    .scan-btn {
-      background: #212529; color: #fff; border: none; padding: 6px 12px;
-      border-radius: 8px; font-size: 12px; cursor: pointer;
-    }
-
-    /* 반반 비교 영역 */
-    .compare-container {
-      height: 360px; display: flex; position: relative; overflow: hidden; background: #000;
-    }
+    .card-toggle-btn { background: #f1f3f5; color: #212529; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .compare-container { height: 360px; display: flex; position: relative; overflow: hidden; background: #000; }
     .img-box { width: 50%; height: 100%; position: relative; overflow: hidden; border-right: 1px solid #eee; }
     .img-box:last-child { border-right: none; }
     .img-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s ease; cursor: zoom-in; }
-    .img-label {
-      position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.5);
-      color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; z-index: 10;
-    }
-
-    /* 상태 버튼 탭 (모던 심플) */
+    .img-label { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.5); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; z-index: 10; }
     .status-tabs { display: flex; background: #fff; padding: 8px; gap: 6px; border-bottom: 1px solid #eee; }
-    .tab-btn {
-      flex: 1; padding: 10px 4px; border: none; border-radius: 8px;
-      background: #f8f9fa; color: #868e96; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
+    .tab-btn { flex: 1; padding: 10px 4px; border: none; border-radius: 8px; background: #f8f9fa; color: #868e96; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .tab-btn.active { background: #2b8a3e; color: #fff; }
-
-    /* 메인 본문 여백 */
     .content-area { padding: 20px; text-align: center; color: #495057; font-size: 14px; flex: 1; display: flex; align-items: center; justify-content: center; }
-
-    /* 모던 앤 클린: 플로팅 AI 상담 버튼 (우측 하단) */
-    .floating-ai-btn {
-      position: absolute; bottom: 20px; right: 20px; width: 56px; height: 56px;
-      background: #2b8a3e; color: #fff; border: none; border-radius: 50%;
-      box-shadow: 0 4px 15px rgba(43, 138, 62, 0.4); cursor: pointer; z-index: 50;
-      display: flex; align-items: center; justify-content: center; font-size: 24px;
-      transition: transform 0.2s;
-    }
+    .floating-ai-btn { position: absolute; bottom: 20px; right: 20px; width: 56px; height: 56px; background: #2b8a3e; color: #fff; border: none; border-radius: 50%; box-shadow: 0 4px 15px rgba(43, 138, 62, 0.4); cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: transform 0.2s; }
     .floating-ai-btn:hover { transform: scale(1.05); }
-
-    /* 인스타 감성 모달 채팅창 (슬라이드 업) */
-    .chat-modal-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); display: none; flex-direction: column;
-      justify-content: flex-end; z-index: 90;
-    }
-    .chat-modal-content {
-      background: #fff; width: 100%; height: 80%; border-radius: 24px 24px 0 0;
-      display: flex; flex-direction: column; overflow: hidden;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.15);
-    }
-    .chat-header {
-      padding: 16px; border-bottom: 1px solid #f1f3f5; display: flex;
-      justify-content: space-between; align-items: center; font-weight: 600; color: #212529;
-    }
-    .chat-header-info { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+    .chat-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; flex-direction: column; justify-content: flex-end; z-index: 90; }
+    .chat-modal-content { background: #fff; width: 100%; height: 80%; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); }
+    .chat-header { padding: 16px; border-bottom: 1px solid #f1f3f5; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: #212529; }
     .chat-close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #868e96; }
-
-    /* 메시지 내역 영역 */
     .chat-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .msg-box { max-width: 80%; padding: 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; }
+    .msg-box { max-width: 80%; padding: 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; word-break: break-all; }
     .msg-ai { background: #f8f9fa; color: #212529; align-self: flex-start; border-top-left-radius: 4px; }
     .msg-user { background: #2b8a3e; color: #fff; align-self: flex-end; border-top-right-radius: 4px; }
-
-    /* 입력창 & 카메라 바 */
-    .chat-input-bar {
-      padding: 12px 16px; border-top: 1px solid #f1f3f5; display: flex;
-      align-items: center; gap: 8px; background: #fff;
-    }
-    .file-upload-btn {
-      background: #f1f3f5; color: #495057; width: 38px; height: 38px;
-      border-radius: 50%; border: none; display: flex; align-items: center;
-      justify-content: center; font-size: 18px; cursor: pointer;
-    }
-    .chat-text-input {
-      flex: 1; border: 1px solid #e9ecef; border-radius: 20px; padding: 10px 14px;
-      font-size: 14px; outline: none; background: #f8f9fa;
-    }
-    .chat-text-input:focus { background: #fff; border-color: #adb5bd; }
-    .chat-send-btn {
-      background: none; border: none; font-weight: 600; color: #2b8a3e;
-      cursor: pointer; padding: 0 8px; font-size: 14px;
-    }
-    /* 숨겨진 파일 첨부 input (카메라/앨범 호출용) */
+    .chat-input-bar { padding: 12px 16px; border-top: 1px solid #f1f3f5; display: flex; align-items: center; gap: 8px; background: #fff; }
+    .file-upload-btn { background: #f1f3f5; color: #495057; width: 38px; height: 38px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+    .chat-text-input { flex: 1; border: 1px solid #e9ecef; border-radius: 20px; padding: 10px 14px; font-size: 14px; outline: none; background: #f8f9fa; }
+    .chat-send-btn { background: none; border: none; font-weight: 600; color: #2b8a3e; cursor: pointer; padding: 0 8px; font-size: 14px; }
     #file-input { display: none; }
   </style>
 </head>
@@ -114,163 +41,65 @@
 
   <div class="phone-frame">
     <div class="header">
-      <button class="card-toggle-btn" onclick="alert('요약 카드가 열립니다!')">🌿 <span id="plant-name-btn">몬스테라</span> 요약 보기 ▾</button>
-    </div>
-
-    <div class="scan-bar">
-      <button class="scan-btn" onclick="scanRandomPlant()">📸 식물 카메라 인식 (테스트 스캔)</button>
+      <button class="card-toggle-btn">🌿 <span id="plant-name-btn">나만의 식물 주치의</span> ▾</button>
     </div>
 
     <!-- 반반 비교 화면 -->
     <div class="compare-container">
       <div class="img-box" id="my-img-box">
         <span class="img-label">내 식물 (터치 줌)</span>
-        <img id="my-plant-img" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500&auto=format&fit=crop&q=80" alt="내 식물">
+        <img id="my-plant-img" src="https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500&auto=format&fit=crop&q=80">
       </div>
       <div class="img-box" id="ref-img-box">
         <span class="img-label" id="ref-label">비교: 물 부족</span>
-        <img id="ref-plant-img" src="https://images.unsplash.com/photo-1599598425947-d35053fd4f00?w=500&auto=format&fit=crop&q=80" alt="예시 식물">
+        <img id="ref-plant-img" src="https://images.unsplash.com/photo-1599598425947-d35053fd4f00?w=500&auto=format&fit=crop&q=80">
       </div>
     </div>
 
     <!-- 상태 버튼 -->
     <div class="status-tabs">
-      <button class="tab-btn active" onclick="changeStatus('water')">💧 물 부족</button>
-      <button class="tab-btn" onclick="changeStatus('light')">☀️ 빛 과다</button>
-      <button class="tab-btn" onclick="changeStatus('healthy')">🌿 정상/건강</button>
+      <button class="tab-btn active">💧 물 부족</button>
+      <button class="tab-btn">☀️ 빛 과다</button>
+      <button class="tab-btn">🌿 정상/건강</button>
     </div>
 
-    <!-- 여백 메인 콘텐츠 -->
     <div class="content-area">
       <p>궁금한 식물이 있다면<br>우측 하단의 <b>🌿 주치의 버튼</b>을 눌러보세요!</p>
     </div>
 
-    <!-- [1] 인스타 감성 플로팅 버튼 -->
     <button class="floating-ai-btn" onclick="toggleChat(true)">🌿</button>
 
-    <!-- [2] 모달 채팅창 (슬라이드 업) -->
     <div class="chat-modal-overlay" id="chat-modal">
       <div class="chat-modal-content">
-        <!-- 헤더 -->
         <div class="chat-header">
-          <div class="chat-header-info">
-            <span>🌿 다정한 식물 주치의</span>
-          </div>
+          <span>🌿 다정한 꽃집 사장님</span>
           <button class="chat-close-btn" onclick="toggleChat(false)">✕</button>
         </div>
-
-        <!-- 메시지 창 -->
         <div class="chat-messages" id="chat-messages">
-          <!-- 요청하신 찰떡 AI 첫인사 멘트! -->
           <div class="msg-box msg-ai">
-            <b>식집사야 안녕? 🌿</b><br>
-            난 너의 식물 키우기를 도와줄 다정한 주치의야!<br>
-            아픈 식물 사진을 찍어 올리거나 궁금한 점을 물어봐줘!
+            <b>식집사님 안녕~ 🌷</b><br>
+            난 동네에서 제일 다정한 꽃집 사장님이야!<br>
+            우리 초록이들이 어디가 아픈지 사진을 찰칵 찍어 보여줄래?
           </div>
         </div>
-
-        <!-- 하단 입력 & 사진 첨부 바 -->
         <div class="chat-input-bar">
-          <!-- 사진 촬영 & 갤러리 앨범 동시 지원 버튼 -->
           <button class="file-upload-btn" onclick="document.getElementById('file-input').click()">📷</button>
           <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImageSelect(event)">
-          
           <input type="text" class="chat-text-input" id="chat-input" placeholder="식물 상태를 물어보세요..." onkeypress="if(event.key === 'Enter') sendMessage()">
           <button class="chat-send-btn" onclick="sendMessage()">전송</button>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-    /* ==========================================
-       1. 식물 데이터 & 반반 줌 제어 (기존 동일)
-    ========================================== */
-    const plantDB = {
-      monstera: {
-        name: "몬스테라",
-        myImg: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500&auto=format&fit=crop&q=80",
-        refImgs: {
-          water: "https://images.unsplash.com/photo-1599598425947-d35053fd4f00?w=500&auto=format&fit=crop&q=80",
-          light: "https://images.unsplash.com/photo-1632207191677-8446985f9d65?w=500&auto=format&fit=crop&q=80",
-          healthy: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=500&auto=format&fit=crop&q=80"
-        }
-      },
-      areca: {
-        name: "아레카야자",
-        myImg: "https://images.unsplash.com/photo-1597055181308-e3a479268305?w=500&auto=format&fit=crop&q=80",
-        refImgs: {
-          water: "https://images.unsplash.com/photo-1512428813834-c702c7702b78?w=500&auto=format&fit=crop&q=80",
-          light: "https://images.unsplash.com/photo-1597055181308-e3a479268305?w=500&auto=format&fit=crop&q=80",
-          healthy: "https://images.unsplash.com/photo-1597055181308-e3a479268305?w=500&auto=format&fit=crop&q=80"
-        }
-      }
-    };
+    // ★ 여기에 발급받은 API 키를 꼭 붙여넣어 줘! ★
+    const API_KEY = 'AQ.Ab8RN6LaqtQwl7hqJwT3f8GvVFA10OdwdUCVTxyXwwq-VCETDQ'; 
+    
+    let currentImageBase64 = null;
 
-    let currentPlantKey = 'monstera';
-    let currentStatus = 'water';
-
-    function changeStatus(status) {
-      currentStatus = status;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      const labelMap = { water: "비교: 물 부족", light: "비교: 빛 과다", healthy: "비교: 정상/건강" };
-      document.getElementById('ref-label').innerText = labelMap[status];
-      document.getElementById('ref-plant-img').src = plantDB[currentPlantKey].refImgs[status];
-    }
-
-    function scanRandomPlant() {
-      const keys = Object.keys(plantDB);
-      currentPlantKey = keys.find(k => k !== currentPlantKey) || keys[0];
-      document.getElementById('plant-name-btn').innerText = plantDB[currentPlantKey].name;
-      document.getElementById('my-plant-img').src = plantDB[currentPlantKey].myImg;
-      changeStatus(currentStatus);
-    }
-
-    // 1:1 동시 줌인
-    let isZoomed = false;
-    document.getElementById('my-img-box').addEventListener('click', () => {
-      isZoomed = !isZoomed;
-      const scale = isZoomed ? 'scale(2.2)' : 'scale(1)';
-      document.getElementById('my-plant-img').style.transform = scale;
-      document.getElementById('ref-plant-img').style.transform = scale;
-    });
-
-    /* ==========================================
-       2. 인스타 감성 채팅 모달 제어 & 시뮬레이션
-    ========================================== */
-    function toggleChat(show) {
-      document.getElementById('chat-modal').style.display = show ? 'flex' : 'none';
-    }
-
-    // 텍스트 메시지 전송 (테스트 시뮬레이션)
-    function sendMessage() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      // 사용자 메시지 화면에 추가
-      appendMessage(text, 'user');
-      input.value = '';
-
-      // AI 답변 시뮬레이션 (0.8초 뒤)
-      setTimeout(() => {
-        appendMessage("조금만 기다려줘! 곧 진짜 인공지능(Gemini) 두뇌가 연결돼서 식물 처방전을 내려줄 거야! 🌿✨", 'ai');
-      }, 800);
-    }
-
-    // 사진 촬영 or 갤러리 업로드 시뮬레이션
-    function handleImageSelect(event) {
-      const file = event.target.files[0];
-      if (file) {
-        appendMessage(`[📸 사진 첨부 완료: ${file.name}]`, 'user');
-        setTimeout(() => {
-          appendMessage("사진 잘 받았어! 곧 AI 눈(Vision)을 붙이면 이 식물의 아픈 곳을 1초 만에 분석할 수 있어!", 'ai');
-        }, 1000);
-      }
-    }
-
+    function toggleChat(show) { document.getElementById('chat-modal').style.display = show ? 'flex' : 'none'; }
+    
     function appendMessage(text, sender) {
       const msgBox = document.createElement('div');
       msgBox.className = `msg-box msg-${sender}`;
@@ -278,6 +107,56 @@
       const container = document.getElementById('chat-messages');
       container.appendChild(msgBox);
       container.scrollTop = container.scrollHeight;
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          currentImageBase64 = e.target.result.split(',')[1];
+          appendMessage(`[📸 사진 첨부 완료: ${file.name}]<br>이제 상태를 물어봐 줘!`, 'user');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text && !currentImageBase64) return;
+
+      appendMessage(text || "이 식물 상태 좀 봐주세요!", 'user');
+      input.value = '';
+      appendMessage("음~ 사진을 자세히 보고 있어! 1초만 기다려줘~ 🌷", 'ai');
+
+      try {
+        const promptText = "너는 다정다감하고 친절한 동네 꽃집 사장님이야. 초보 식집사의 마음을 다독이며 반말로 친근하게 대답해줘. 이모지도 많이 써줘. 사진 속 식물이 무엇인지, 상태가 어떤지 진단하고 3줄 이내로 짧고 명확하게 해결책을 알려줘. 사용자의 질문: " + text;
+        
+        let contents = [{ parts: [{text: promptText}] }];
+        if (currentImageBase64) {
+          contents[0].parts.push({
+            inlineData: { mimeType: "image/jpeg", data: currentImageBase64 }
+          });
+        }
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: contents })
+        });
+
+        const data = await response.json();
+        const aiText = data.candidates[0].content.parts[0].text;
+        
+        // 로딩 메시지 삭제 후 진짜 답변 달기
+        const chatContainer = document.getElementById('chat-messages');
+        chatContainer.removeChild(chatContainer.lastChild);
+        appendMessage(aiText.replace(/\n/g, '<br>'), 'ai');
+        currentImageBase64 = null; // 사진 초기화
+      } catch (error) {
+        appendMessage("앗, 지금 꽃집에 손님이 많아서 대답하기가 힘들어! 다시 한 번 물어봐 줄래? 😭", 'ai');
+      }
     }
   </script>
 </body>
